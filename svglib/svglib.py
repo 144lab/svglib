@@ -29,7 +29,7 @@ import sys
 from collections import defaultdict, namedtuple
 from functools import partial
 
-from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
+from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth, getFont
 from reportlab.pdfbase.ttfonts import TTFError, TTFont
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 from reportlab.pdfgen.pdfimages import PDFImage
@@ -72,6 +72,22 @@ split_whitespace = re.compile('[^ \t\r\n\f]+').findall
 
 def find_font(font_name):
     """Return the font and a Boolean indicating if the match is exact."""
+
+    """ try to get registerd font.
+
+    When some fonts are already registerd, we can use them.
+    But it's neccesary to register the font's name as same as written in
+    SVG files.
+
+    >>> pdfmetrics.registerFont(TTFont('IPAGothic', TTF_FONT))
+    >>> drawing = svg2rlg(svg_path)
+    """
+    try:
+        getFont(font_name)
+        return font_name, True
+    except KeyError:
+        pass
+
     if font_name in STANDARD_FONT_NAMES:
         return font_name, True
     elif font_name in _registered_fonts:
